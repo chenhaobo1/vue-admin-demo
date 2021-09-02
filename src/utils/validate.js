@@ -34,6 +34,6 @@ export function validatePass(regPass){
  * 验证码校验
  */
 export function validateCodes(regCode){
-  let reg = /^[a-z0-9]{6}$/;
+  let reg = /[a-z0-9]{6}/;
   return !reg.test(regCode);
 }

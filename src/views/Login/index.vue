@@ -16,7 +16,7 @@
         :model="ruleForm"
         status-icon
         :rules="rules"
-        ref="ruleForm"
+        ref="root"
         class="login-form"
         size="medium"
       >
@@ -31,7 +31,7 @@
         <el-form-item prop="password">
           <label>密码</label>
           <el-input
-            type="text"
+            type="password"
             v-model="ruleForm.password"
             autocomplete="off"
             minlength="6"
@@ -41,7 +41,7 @@
         <el-form-item prop="passwords" v-if="isActive !== 0">
           <label>重复密码</label>
           <el-input
-            type="text"
+            type="password"
             v-model="ruleForm.passwords"
             autocomplete="off"
             minlength="6"
@@ -53,14 +53,18 @@
           <el-row :gutter="15">
             <el-col :span="15"
               ><el-input
-                v-model.number="ruleForm.code"
+                v-model="ruleForm.code"
                 minlength="6"
                 maxlength="6"
               ></el-input
             ></el-col>
             <el-col :span="9">
-              <el-button class="button-block" type="success"
-                >获取验证码</el-button
+              <el-button
+                class="button-block"
+                type="success"
+                :disabled="codeButtonStatus.status"
+                @click="getSmsOne()"
+                >{{ codeButtonStatus.text }}</el-button
               >
             </el-col>
           </el-row>
@@ -69,8 +73,9 @@
           <el-button
             class="login-btn button-block"
             type="danger"
-            @click="submitForm('ruleForm')"
-            >提交</el-button
+            @click="submitForm"
+            :disabled="submitDis"
+            >{{ isActive !== 0 ? "注册" : "登录" }}</el-button
           >
         </el-form-item>
       </el-form>
@@ -79,92 +84,71 @@
 </template>
 
 <script>
-import {
-  stripscript,
-  validateEmail,
-  validatePass,
-  validateCodes,
-} from "@/utils/validate.js";
+import { reactive, ref } from "@vue/reactivity";
+import { validateMethods } from "./validate";
+import { buttonMethods } from "./buttonMethod";
+
+function useRuleForm() {
+  //初始化变量
+  const ruleForm = reactive({
+    username: "3517730047@qq.com",
+    password: "",
+    passwords: "",
+    code: "",
+    srcTwo: "",
+  });
+  const isActive = ref(0);
+  // 验证码延迟状态
+  const codeButtonStatus = reactive({
+    status:false,
+    text:"获取验证码"
+  })
+  // 按钮默认方法
+  const submitDis = ref(false);
+  // 提交方法
+  const root = ref(null);
+  return {
+    ruleForm,
+    isActive,
+    submitDis,
+    root,
+    codeButtonStatus,
+  };
+}
 export default {
   naem: "login",
-  data() {
-    // 验证邮箱
-    var validateUsername = (rule, value, callback) => {
-      if (value === "") {
-        callback(new Error("请输入邮箱"));
-      } else if (validateEmail(value)) {
-        callback(new Error("邮箱格式错误"));
-      } else {
-        callback();
-      }
-    };
-    // 验证密码
-    var validatePassword = (rule, value, callback) => {
-      // 过滤后的值
-      this.ruleForm.password = stripscript(value);
-      value = this.ruleForm.password;
-      if (value === "") {
-        callback(new Error("请输入密码"));
-      } else if (validatePass(value)) {
-        callback(new Error("密码为6至20位数字+字母"));
-      } else {
-        callback();
-      }
-    };
-    //验证重复密码
-    var validatePasswords = (rule, value, callback) => {
-      if (this.isActive === 0) {
-        callback();
-      }
-      if (value === "") {
-        callback(new Error("请再次输入密码"));
-      } else if (value !== this.ruleForm.password) {
-        callback(new Error("重复密码不正确"));
-      } else {
-        callback();
-      }
-    };
-    // 验证验证码
-    var validateCode = (rule, value, callback) => {
-      this.ruleForm.code = stripscript(value);
-      value = this.ruleForm.code;
-      if (value === "") {
-        return callback(new Error("请输入验证码"));
-      } else if (validateCodes(value)) {
-        return callback(new Error("验证码格式有误"));
-      }
-    };
+  setup() {
+    const menuTab = reactive([{ txt: "登录" }, { txt: "注册" }]);
+    // 变量存放
+    let {
+      ruleForm,
+      isActive,
+      submitDis,
+      root,
+      codeButtonStatus,
+    } = useRuleForm();
+    // 登录注册验证方法
+    let { rules } = validateMethods(ruleForm, isActive);
+    // 按钮方法
+    let { submitForm, getSmsOne, toggleMenu } = buttonMethods(
+      isActive,
+      ruleForm,
+      root,
+      codeButtonStatus,
+      submitDis
+    );
     return {
-      menuTab: [{ txt: "登录" }, { txt: "注册" }],
-      isActive: 0,
-      ruleForm: {
-        username: "",
-        password: "",
-        passwords: "",
-        code: "",
-      },
-      rules: {
-        username: [{ validator: validateUsername, trigger: "blur" }],
-        password: [{ validator: validatePassword, trigger: "blur" }],
-        passwords: [{ validator: validatePasswords, trigger: "blur" }],
-        code: [{ validator: validateCode, trigger: "blur" }],
-      },
+      ruleForm,
+      menuTab,
+      isActive,
+      rules,
+      root,
+      toggleMenu,
+      submitForm,
+      getSmsOne,
+      submitDis,
+      codeButtonStatus,
     };
-  },
-  methods: {
-    toggleMenu(index) {
-      this.isActive = index;
-    },
-    submitForm(formName) {
-      this.$refs[formName].validate((valid) => {
-        if (valid) {
-          alert("submit!");
-        } else {
-          console.log("error submit!!");
-          return false;
-        }
-      });
-    },
   },
 };
 </script>

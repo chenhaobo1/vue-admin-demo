@@ -5,7 +5,7 @@ module.exports = {
   // 输出文件目录
   outputDir: process.env.NODE_ENV === "production" ? "dist" : "devdist",
   // eslint-loader 是否在保存的时候检查
-  lintOnSave: false,
+  lintOnSave: true,
   /** vue3.0内置了webpack所有东西，
    * webpack配置,see https://github.com/vuejs/vue-cli/blob/dev/docs/webpack.md
    **/
@@ -64,6 +64,18 @@ module.exports = {
     // https: false, // 编译失败时刷新页面
     // hot: true, // 开启热加载
     // hotOnly: false,
+    proxy: {
+      "/api": {
+        // 此处的写法，目的是为了 将 /api 替换成 https://www.baidu.com/
+        target: "http://old.web-jshtml.cn/vue_admin_api",
+        // 允许跨域
+        changeOrigin: true,
+        ws: true,
+        pathRewrite: {
+          "^/api": "",
+        },
+      },
+    },
     // proxy: {
     //   [process.env.VUE_APP_API]: {
     //       target: process.env.VUE_API_DEV_TARGET, //API服务器的地址
