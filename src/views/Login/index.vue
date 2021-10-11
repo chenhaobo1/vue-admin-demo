@@ -91,7 +91,7 @@ import { buttonMethods } from "./buttonMethod";
 function useRuleForm() {
   //初始化变量
   const ruleForm = reactive({
-    username: "3517730047@qq.com",
+    username: "3517@qq.com",
     password: "",
     passwords: "",
     code: "",
