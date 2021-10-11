@@ -15,9 +15,8 @@ export function buttonMethods(isActive, ruleForm, root, codeButtonStatus, submit
     const submitForm = () => {
         root.value.validate((valid) => {
             if (valid) {
-                isActive.value == 1?register():login()
+                isActive.value == 1 ? register() : login()
             } else {
-                console.log("error submit!!");
                 return false;
             }
         });
@@ -55,6 +54,7 @@ export function buttonMethods(isActive, ruleForm, root, codeButtonStatus, submit
                 message: data.message,
                 type: 'success'
             });
+            root.value.$router.push({ name: 'Console' })
         }).catch(error => {
             console.log(error);
         })
